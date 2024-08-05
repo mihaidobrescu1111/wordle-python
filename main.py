@@ -10,18 +10,12 @@ ie = 0
 word = ""
 next_word = 0
 game_won = False
-word_list_final = []
-word_dict = {}
 
-with open("score.txt") as file:
+with open("score.txt", "r") as file:
     score = int(file.read())
 
-with open("english3.txt", "r") as file:
-    word_list = file.readlines()
-    for word in word_list:
-        word1 = word.strip("\n")
-        if len(word1) == 5:
-            word_list_final.append(word1)
+with open("output.txt", "r") as file:
+    word_list_final = [line.strip() for line in file]
 
 word_to_guess = random.choice(word_list_final)
 
@@ -85,30 +79,9 @@ def check_word():
     global next_word
     global score
     global game_won
-    global word_dict
-    letter_check = []
-    for check in range(5):
-        letter_check.append(False)
-    m = 0
-    for a in range(5):
-        word_dict[word_to_guess[a]] = 0
-    for a in range(5):
-        word_dict[word_to_guess[a]] += 1
-    for j in range(0, 5):
-        if word_to_guess[j].lower() == word[j].lower():
-            entry_list[(next_word - 1) * 5 + j].config(bg="green")
-            word_dict[entry_var_list[(next_word - 1) * 5 + j].get()] -= 1
-            letter_check[j] = True
-    while m < 5:
-        for n in range(0, 5):
-            if word[m].lower() == word_to_guess[n].lower() and m != n and \
-                    word_dict[entry_var_list[(next_word - 1) * 5 + m].get()] != 0 and not letter_check[m]:
-                entry_list[(next_word - 1) * 5 + m].config(bg="yellow")
-                word_dict[entry_var_list[(next_word - 1) * 5 + m].get()] -= 1
-                if m < 4:
-                    m += 1
-        m += 1
-
+    if next_word == 6 and game_won is False:
+        messagebox.showinfo(message=f"You lost!\nWord was {word_to_guess}")
+        new_game()
     if word_to_guess.lower() == word.lower():
         score += 1
         score_label.config(text=f"Score: {score}")
@@ -117,10 +90,25 @@ def check_word():
         game_won = True
         messagebox.showinfo(message=f"You won!\nWord was {word_to_guess}")
         new_game()
-    if next_word == 6 and game_won is False:
-        messagebox.showinfo(message=f"You lost!\nWord was {word_to_guess}")
-        new_game()
-    word = ""
+    else:
+        word_dict = {}
+        for char in word_to_guess:
+            if char not in word_dict:
+                word_dict[char] = 1
+            else:
+                word_dict[char] += 1
+        for j in range(len(word_to_guess)):
+            print(word_to_guess[j], word[j])
+            if word_to_guess[j] == word[j]:
+                entry_list[(next_word - 1) * 5 + j].config(bg="green")
+                word_dict[word[j]] -= 1
+                print()
+        for char in word:
+            if char in word_to_guess and word_dict[char] > 0 and entry_list[(next_word - 1) * 5 + j]["background"] != "green":
+                idx = word.index(char)
+                if 5 > idx > 0:
+                    entry_list[(next_word - 1) * 5 + idx].config(bg="yellow")
+                    word_dict[char] -= 1
 
 
 def new_game():
@@ -128,8 +116,6 @@ def new_game():
     global ie
     global word
     global next_word
-    global word_dict
-    word_dict = {}
     word_to_guess = random.choice(word_list_final)
     ie = 0
     entry_list[ie].focus()
