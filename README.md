@@ -1,1 +1,1 @@
-Wordle application made in python with tkinter and 200,000 5 letter words database
+Wordle application made in python with tkinter and 11,000 5 letter words database
